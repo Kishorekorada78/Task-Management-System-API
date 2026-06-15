@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		
 		// get the token from the header
 		 String token=getToken(request);
-		 
+		 System.out.println("TOKEN = " + token);
 		// check the either valid or not
 		 try {
 			    if(StringUtils.hasText(token) &&
@@ -55,8 +55,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			                             .setAuthentication(auth);
 			    }
 			}
-			catch(Exception e) {
-			    System.out.println("Invalid JWT: " + e.getMessage());
+		 catch(Exception e) {
+			    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			    response.getWriter().write("JWT expired or invalid");
+			    return;
 			}
 		 filterChain.doFilter(request, response);
 		// if valid load  the user and set authentication

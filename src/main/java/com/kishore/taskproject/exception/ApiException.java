@@ -12,4 +12,7 @@ public class ApiException extends RuntimeException{
 		super(message);
 		this.message=message;
 	}
+	public String getMessage() {
+	    return message;
+	}
 }

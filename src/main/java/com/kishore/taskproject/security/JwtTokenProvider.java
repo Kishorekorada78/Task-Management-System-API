@@ -42,7 +42,9 @@ public class JwtTokenProvider {
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + 3600000);
-
+        System.out.println("Generating JWT for: " + email);
+        System.out.println("Now = " + now);
+        System.out.println("Expiry = " + expiry);
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(now)
@@ -51,27 +53,35 @@ public class JwtTokenProvider {
                 .compact();
     }
     public String getEmailFromToken(String token) {
-
+    	 Date now = new Date();
+         Date expiry = new Date(now.getTime() + 3600000);
         Claims claims = Jwts.parser()
                 .verifyWith(getKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-
+        System.out.println("Generating OAuth JWT for: " + token);
+        System.out.println("Now = " + now);
+        System.out.println("Expiry = " + expiry);
         return claims.getSubject();
     }
     
     public boolean validateToken(String token) {
         try {
 
-            Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token);
+            Claims claims = Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            System.out.println("TOKEN EMAIL = " + claims.getSubject());
+            System.out.println("TOKEN EXPIRY = " + claims.getExpiration());
 
             return true;
 
         } catch (Exception e) {
+            System.out.println("FAILED TOKEN = " + token);
             throw new ApiException("Token Issue: " + e.getMessage());
         }
     }

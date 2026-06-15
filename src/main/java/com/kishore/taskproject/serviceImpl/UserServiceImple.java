@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.kishore.taskproject.entity.Users;
+import com.kishore.taskproject.exception.ApiException;
 import com.kishore.taskproject.payload.UserDTO;
 import com.kishore.taskproject.repository.UserRepositary;
 import com.kishore.taskproject.service.UserService;
@@ -21,6 +22,8 @@ public class UserServiceImple implements UserService{
 	@Override
 	public UserDTO createUser(UserDTO userdto) {
 		// userDTO is not an entity of Users
+	   if(userRepo.findByEmail(userdto.getEmail()).isPresent())
+		   throw new ApiException("Email already exists");
 		userdto.setPassword(passworsEncoder.encode(userdto.getPassword()));
 		Users user=userDtoToEntity(userdto);
 		Users savedUser=userRepo.save(user);
@@ -41,7 +44,6 @@ public class UserServiceImple implements UserService{
     	UserDTO userdto=new UserDTO();
     	userdto.setId(savedUser.getId());
     	userdto.setEmail(savedUser.getEmail());
-    	userdto.setPassword(savedUser.getPassword());
     	userdto.setName(savedUser.getName());
     	return userdto;
     }
