@@ -1,7 +1,6 @@
 package com.kishore.taskproject.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.kishore.taskproject.payload.TaskDTO;
@@ -11,7 +10,7 @@ public interface TaskService {
 
 	public TaskDTO saveTask(long userid, TaskDTO taskdto);
 	
-	public List<TaskDTO> getAllTasks(long userid);
+	public Page<TaskDTO> getAllTasks(long userid,int pageNo,int pageSize);
 	
 	public TaskDTO getTask(long userid,long taskid);
 	

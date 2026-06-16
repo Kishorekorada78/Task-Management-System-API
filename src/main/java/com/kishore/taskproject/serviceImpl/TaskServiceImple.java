@@ -3,6 +3,11 @@ package com.kishore.taskproject.serviceImpl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,14 +47,39 @@ public class TaskServiceImple implements TaskService{
 	}
 
 	@Override
-	public List<TaskDTO> getAllTasks(long userid) {
-		userRepo.findById(userid).orElseThrow(
-    			()-> new UserNotFound(String.format("User Id %d not found", userid)));
-		List<Task> tasks=taskRepo.findAllByUsersId(userid);
-		return tasks.stream()
-				.map(task-> modelMapper.map(task, TaskDTO.class)).collect(Collectors.toList());
-	}
+	public Page<TaskDTO> getAllTasks(
+	        long userid,
+	        int pageNo,
+	        int pageSize) {
 
+	    userRepo.findById(userid).orElseThrow(
+	            () -> new UserNotFound(
+	                    String.format(
+	                            "User Id %d not found",
+	                            userid)));
+
+	    Pageable pageable =
+	            PageRequest.of(pageNo, pageSize);
+
+	    Page<Task> tasks =
+	            taskRepo.findAllByUsersId(
+	                    userid,
+	                    pageable);
+
+	    List<TaskDTO> taskDtos =
+	            tasks.getContent()
+	                 .stream()
+	                 .map(task ->
+	                      modelMapper.map(
+	                              task,
+	                              TaskDTO.class))
+	                 .toList();
+
+	    return new PageImpl<>(
+	            taskDtos,
+	            pageable,
+	            tasks.getTotalElements());
+	}
 	@Override
 	public TaskDTO getTask(long userid, long taskid) {
 		Users user=	userRepo.findById(userid).orElseThrow(
