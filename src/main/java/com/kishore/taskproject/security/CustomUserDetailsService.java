@@ -24,16 +24,21 @@ public class CustomUserDetailsService implements UserDetailsService{
 	private UserRepositary userRepo;
 
 	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		Users user = userRepo.findByEmail(email)
-		        .orElseThrow(() ->
-		                new UsernameNotFoundException(
-		                        String.format("User with email %s not found", email)
-		                ));
-		Set<String> roles=new HashSet<String>();
-		roles.add("ROLE ADMIN");
-		return new User(user.getEmail(),user.getPassword(),userAuthorization(roles));
+	public UserDetails loadUserByUsername(String email)
+	        throws UsernameNotFoundException {
+
+	    Users user = userRepo.findByEmail(email)
+	            .orElseThrow(() ->
+	                    new UsernameNotFoundException(
+	                            "User not found"));
+
+	    return User.builder()
+	            .username(user.getEmail())
+	            .password(user.getPassword())
+	            .authorities(user.getRole())
+	            .build();
 	}
+	
 	  private Collection<? extends GrantedAuthority> userAuthorization(Set<String> roles){
 		  return roles.stream().map(
 				  role -> new SimpleGrantedAuthority(role)

@@ -29,15 +29,12 @@ public class UserServiceImple implements UserService{
 		Users savedUser=userRepo.save(user);
 		return entityToUserDto(savedUser);
 	}
-	private Users userDtoToEntity1(UserDTO userdto) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	private Users userDtoToEntity(UserDTO userdto) {
 		Users users=new Users();
 		users.setName(userdto.getName());
 		users.setEmail(userdto.getEmail());;
 		users.setPassword(userdto.getPassword());
+		users.setRole("ROLE_USER");
 		return users;
 	}
     private UserDTO entityToUserDto(Users savedUser) {

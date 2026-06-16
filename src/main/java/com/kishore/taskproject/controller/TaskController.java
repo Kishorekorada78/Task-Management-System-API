@@ -31,13 +31,11 @@ public class TaskController {
 		 @PathVariable(name="userid") long userid,
 		 @RequestBody TaskDTO taskDto
 		){
-		// taskService.saveTask(userid, taskDto);
 		 return new ResponseEntity<>(taskService.saveTask(userid, taskDto),HttpStatus.CREATED);
 	 }
 	 
-	 @PreAuthorize(value="ROLE_USER")
-	 
 	// get all task
+	 @PreAuthorize("hasAnyRole('USER','ADMIN')")
 	 @GetMapping("/{userid}/tasks")
 	 public ResponseEntity<List<TaskDTO>> getAllTasks(
 			 @PathVariable(name="userid") long userid){
@@ -52,8 +50,9 @@ public class TaskController {
 		 return new ResponseEntity<>(taskService.getTask(userid, taskid),HttpStatus.OK);
 	 }
 	 
-	 @PreAuthorize(value="ROLE_ADMIN")
+	
 	// delete indv task
+	 @PreAuthorize("hasRole('ADMIN')")
 	 @DeleteMapping("/{userid}/tasks/{taskid}")
 	 public ResponseEntity<Map<String, String>> deleteTask(
 			  @PathVariable(name="userid") long userid,

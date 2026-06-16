@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +17,8 @@ import com.kishore.taskproject.payload.LoginDTO;
 import com.kishore.taskproject.payload.UserDTO;
 import com.kishore.taskproject.security.JwtTokenProvider;
 import com.kishore.taskproject.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +35,7 @@ public class AuthController {
 	private JwtTokenProvider jwtTokenProvider;
 	
 	@PostMapping("/register")
-	public ResponseEntity createUser(@RequestBody UserDTO userdto) {
+	public ResponseEntity createUser(@Valid @RequestBody UserDTO userdto) {
 		 System.out.println(userdto);
 		return new ResponseEntity<>(userService.createUser(userdto),HttpStatus.CREATED);
 	}
