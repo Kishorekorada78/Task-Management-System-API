@@ -1,15 +1,14 @@
 package com.kishore.taskproject.serviceImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.kishore.taskproject.entity.Task;
@@ -50,16 +49,20 @@ public class TaskServiceImple implements TaskService{
 	public Page<TaskDTO> getAllTasks(
 	        long userid,
 	        int pageNo,
-	        int pageSize) {
+	        int pageSize,
+	        String sortBy,
+	        String sortDir) {
 
 	    userRepo.findById(userid).orElseThrow(
 	            () -> new UserNotFound(
 	                    String.format(
 	                            "User Id %d not found",
 	                            userid)));
-
+	    Sort sort=sortDir.equalsIgnoreCase("asc")
+	    		? Sort.by(sortBy).ascending()
+	    		: Sort.by(sortBy).descending();
 	    Pageable pageable =
-	            PageRequest.of(pageNo, pageSize);
+	            PageRequest.of(pageNo, pageSize,sort);
 
 	    Page<Task> tasks =
 	            taskRepo.findAllByUsersId(

@@ -10,7 +10,7 @@ public interface TaskService {
 
 	public TaskDTO saveTask(long userid, TaskDTO taskdto);
 	
-	public Page<TaskDTO> getAllTasks(long userid,int pageNo,int pageSize);
+	public Page<TaskDTO> getAllTasks(long userid,int pageNo,int pageSize,String sortBy,String sortDir);
 	
 	public TaskDTO getTask(long userid,long taskid);
 	

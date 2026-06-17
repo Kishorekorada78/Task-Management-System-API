@@ -46,9 +46,17 @@ public class TaskController {
 	         @RequestParam(value = "pageNo", defaultValue = "0")
 	         int pageNo,
 	         @RequestParam(value = "pageSize",defaultValue = "5")
-	         int pageSize) {
+	         int pageSize,
+	         @RequestParam(
+	                 value = "sortBy",
+	                 defaultValue = "id")
+	         String sortBy,
+	         @RequestParam(
+	                 value = "sortDir",
+	                 defaultValue = "asc")
+	         String sortDir) {
 	     return new ResponseEntity<>(
-	             taskService.getAllTasks( userid, pageNo, pageSize),
+	             taskService.getAllTasks( userid, pageNo, pageSize, sortBy, sortDir),
 	             HttpStatus.OK);
 	 }
 	 

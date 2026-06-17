@@ -41,7 +41,7 @@ public class JwtTokenProvider {
     public String generateTokenFromEmail(String email) {
 
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + 604800000);
+        Date expiry = new Date(now.getTime() + 3600000);
         System.out.println("Generating JWT for: " + email);
         System.out.println("Now = " + now);
         System.out.println("Expiry = " + expiry);

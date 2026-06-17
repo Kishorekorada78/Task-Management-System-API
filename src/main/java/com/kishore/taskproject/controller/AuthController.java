@@ -12,10 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kishore.taskproject.entity.RefreshToken;
+import com.kishore.taskproject.entity.Users;
 import com.kishore.taskproject.payload.JwtAuthResponse;
 import com.kishore.taskproject.payload.LoginDTO;
+import com.kishore.taskproject.payload.LogoutRequest;
+import com.kishore.taskproject.payload.RefreshTokenRequest;
 import com.kishore.taskproject.payload.UserDTO;
+import com.kishore.taskproject.repository.UserRepositary;
 import com.kishore.taskproject.security.JwtTokenProvider;
+import com.kishore.taskproject.service.RefreshTokenService;
 import com.kishore.taskproject.service.UserService;
 
 import jakarta.validation.Valid;
@@ -34,6 +40,12 @@ public class AuthController {
 	@Autowired
 	private JwtTokenProvider jwtTokenProvider;
 	
+	@Autowired
+	private RefreshTokenService refreshTokenService;
+	
+	@Autowired
+	private UserRepositary userRepo;
+	
 	@PostMapping("/register")
 	public ResponseEntity createUser(@Valid @RequestBody UserDTO userdto) {
 		 System.out.println(userdto);
@@ -48,9 +60,53 @@ public class AuthController {
 			System.out.println(authentication);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		
-		String token= jwtTokenProvider.generateToken(authentication);    // get the toekn
+		String token =
+		        jwtTokenProvider.generateToken(authentication);
 
-		return ResponseEntity.ok(new JwtAuthResponse(token));
+		Users user =
+		        userRepo.findByEmail(
+		                loginDto.getEmail())
+		                .orElseThrow();
+
+		RefreshToken refreshToken =
+		        refreshTokenService
+		                .createRefreshToken(user);
+
+		return ResponseEntity.ok(
+		        new JwtAuthResponse(
+		                token,
+		                refreshToken.getToken()));
 	}
 	
+	@PostMapping("/refresh-token")
+	public ResponseEntity<JwtAuthResponse> refreshToken(
+	        @RequestBody RefreshTokenRequest request){
+
+	    RefreshToken refreshToken =
+	            refreshTokenService.findByToken(
+	                    request.getRefreshToken());
+
+	    refreshTokenService.verifyExpiration(
+	            refreshToken);
+
+	    String token =
+	            jwtTokenProvider.generateTokenFromEmail(
+	                    refreshToken.getUser().getEmail());
+
+	    return ResponseEntity.ok(
+	            new JwtAuthResponse(
+	                    token,
+	                    refreshToken.getToken()));
+	}
+	
+	@PostMapping("/logout")
+	public ResponseEntity<String> logout(
+	        @RequestBody LogoutRequest request){
+
+	    refreshTokenService.deleteByToken(
+	            request.getRefreshToken());
+
+	    return ResponseEntity.ok(
+	            "Logged out successfully");
+	}
 }
