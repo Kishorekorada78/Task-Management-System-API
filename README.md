@@ -1,115 +1,529 @@
 # Task Management System API
 
-## Overview
+A secure and scalable RESTful Task Management System built using Spring Boot. The application provides user authentication, authorization, task management, JWT security, OAuth2 login, refresh tokens, pagination, validation, and API documentation using Swagger.
 
-Task Management System API is a backend application developed using Spring Boot that enables users to manage tasks securely through RESTful APIs. The application implements authentication and authorization using Spring Security and JWT (JSON Web Token).
-
-This project demonstrates backend development concepts such as layered architecture, DTOs, exception handling, JWT authentication, database integration, and REST API development.
+---
 
 ## Features
 
-* User Registration
-* User Login Authentication
-* JWT Token Generation
-* Secure API Access using JWT
-* Create Tasks
-* Update Tasks
-* Delete Tasks
-* View All Tasks
-* Custom Exception Handling
-* DTO-Based Request and Response Handling
-* Role-Based Security Support
-* MySQL Database Integration
+### Authentication & Authorization
 
-## Technologies Used
+* User Registration
+* User Login
+* JWT Authentication
+* Refresh Token Authentication
+* Logout with Refresh Token Revocation
+* Password Encryption using BCrypt
+* Google OAuth2 Login
+* Role-Based Access Control (RBAC)
+* Method-Level Security using Spring Security
+
+### Task Management
+
+* Create Task
+* Get All Tasks
+* Get Task By ID
+* Delete Task
+* User Ownership Validation
+* Secure Access to User Resources
+
+### Security
+
+* Spring Security
+* JWT Access Tokens
+* Refresh Tokens
+* OAuth2 Authentication
+* BCrypt Password Hashing
+* Role-Based Authorization
+
+### API Enhancements
+
+* Request Validation
+* Global Exception Handling
+* Pagination
+* Swagger/OpenAPI Documentation
+
+---
+
+## Tech Stack
+
+### Backend
 
 * Java 17
 * Spring Boot
 * Spring Security
-* JWT (JSON Web Token)
 * Spring Data JPA
 * Hibernate
+
+### Database
+
 * MySQL
+
+### Authentication
+
+* JWT (JSON Web Token)
+* OAuth2 Google Login
+* Refresh Tokens
+
+### Tools & Libraries
+
 * Maven
+* Lombok
 * ModelMapper
+* Swagger/OpenAPI
+* BCrypt Password Encoder
+
+---
+
+## System Architecture
+
+```text
+Client (Postman / Swagger / Frontend)
+                |
+                v
+      Spring Security Filter
+                |
+                v
+       JWT Authentication
+                |
+                v
+           Controllers
+                |
+                v
+            Services
+                |
+                v
+         Spring Data JPA
+                |
+                v
+              MySQL
+```
+
+---
+
+## Authentication Flow
+
+### User Login
+
+```text
+User Login
+     |
+     v
+AuthenticationManager
+     |
+     v
+Validate Credentials
+     |
+     v
+Generate JWT Token
+     |
+     v
+Generate Refresh Token
+     |
+     v
+Store Refresh Token in Database
+```
+
+### Refresh Token Flow
+
+```text
+Access Token Expired
+        |
+        v
+Send Refresh Token
+        |
+        v
+Validate Refresh Token
+        |
+        v
+Generate New JWT
+```
+
+### Logout Flow
+
+```text
+User Logout
+      |
+      v
+Delete Refresh Token
+      |
+      v
+Refresh Token Invalidated
+```
+
+---
 
 ## Project Structure
 
+```text
 src/main/java
 
-* controller
-* service
-* repository
-* entity
-* dto
-* security
-* exception
-* configuration
+├── controller
+│   ├── AuthController
+│   ├── TaskController
+│   └── AdminController
+│
+├── entity
+│   ├── Users
+│   ├── Task
+│   └── RefreshToken
+│
+├── repository
+│   ├── UserRepository
+│   ├── TaskRepository
+│   └── RefreshTokenRepository
+│
+├── service
+│   ├── UserService
+│   ├── TaskService
+│   └── RefreshTokenService
+│
+├── serviceImpl
+│   ├── UserServiceImpl
+│   ├── TaskServiceImpl
+│   └── RefreshTokenServiceImpl
+│
+├── security
+│   ├── JwtAuthenticationFilter
+│   ├── JwtTokenProvider
+│   ├── CustomUserDetailsService
+│   └── OAuth2AuthenticationSuccessHandler
+│
+├── exception
+│   ├── ApiException
+│   ├── UserNotFound
+│   ├── TaskNotFound
+│   └── GlobalExceptionHandler
+│
+└── payload
+    ├── UserDTO
+    ├── LoginDTO
+    ├── JwtAuthResponse
+    ├── RefreshTokenRequest
+    └── LogoutRequest
+```
+
+---
+
+## Database Design
+
+### Users Table
+
+| Column   | Type    |
+| -------- | ------- |
+| id       | BIGINT  |
+| name     | VARCHAR |
+| email    | VARCHAR |
+| password | VARCHAR |
+| role     | VARCHAR |
+
+---
+
+### Tasks Table
+
+| Column      | Type    |
+| ----------- | ------- |
+| id          | BIGINT  |
+| title       | VARCHAR |
+| description | VARCHAR |
+| status      | VARCHAR |
+| user_id     | BIGINT  |
+
+---
+
+### Refresh Token Table
+
+| Column      | Type      |
+| ----------- | --------- |
+| id          | BIGINT    |
+| token       | VARCHAR   |
+| expiry_date | TIMESTAMP |
+| user_id     | BIGINT    |
+
+---
 
 ## API Endpoints
 
 ### Authentication APIs
 
-POST /api/auth/register
+#### Register User
 
+```http
+POST /api/auth/register
+```
+
+#### Login User
+
+```http
 POST /api/auth/login
+```
+
+Response:
+
+```json
+{
+  "token": "jwt-token",
+  "tokenType": "Bearer",
+  "refreshToken": "refresh-token"
+}
+```
+
+#### Refresh JWT Token
+
+```http
+POST /api/auth/refresh-token
+```
+
+Request:
+
+```json
+{
+  "refreshToken": "refresh-token"
+}
+```
+
+Response:
+
+```json
+{
+  "token": "new-jwt-token",
+  "tokenType": "Bearer",
+  "refreshToken": "refresh-token"
+}
+```
+
+#### Logout User
+
+```http
+POST /api/auth/logout
+```
+
+Request:
+
+```json
+{
+  "refreshToken": "refresh-token"
+}
+```
+
+Response:
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+---
 
 ### Task APIs
 
-GET /api/tasks
+#### Create Task
 
-GET /api/tasks/{id}
+```http
+POST /api/{userId}/tasks
+```
 
-POST /api/tasks
+#### Get All Tasks
 
-PUT /api/tasks/{id}
+```http
+GET /api/{userId}/tasks?pageNo=0&pageSize=5
+```
 
-DELETE /api/tasks/{id}
+#### Get Task By ID
 
-## Security Implementation
+```http
+GET /api/{userId}/tasks/{taskId}
+```
 
-* Spring Security Configuration
-* JWT Token Generation
-* JWT Token Validation
-* Protected REST Endpoints
-* Custom UserDetailsService
+#### Delete Task
 
-## Database
+```http
+DELETE /api/{userId}/tasks/{taskId}
+```
 
-MySQL is used as the relational database.
+---
 
-Update database configuration in application.properties before running the project.
+### Admin APIs
 
-## Running the Project
+#### Admin Dashboard Test API
 
-1. Clone the repository
+```http
+GET /api/admin/hello
+```
 
-git clone <repository-url>
+Authorization:
 
-2. Configure MySQL database
+```text
+ROLE_ADMIN
+```
 
-3. Run the application
+---
 
+## Role-Based Access Control (RBAC)
+
+### ROLE_USER
+
+* Create Tasks
+* View Own Tasks
+* View Task Details
+
+### ROLE_ADMIN
+
+* All USER Permissions
+* Delete Tasks
+* Access Admin Endpoints
+
+---
+
+## Validation
+
+Implemented using Jakarta Validation.
+
+Examples:
+
+* Name cannot be blank
+* Email must be valid
+* Password cannot be empty
+
+Example:
+
+```java
+@NotBlank(message = "Name is required")
+private String name;
+
+@Email(message = "Invalid Email")
+private String email;
+```
+
+---
+
+## Global Exception Handling
+
+Implemented using:
+
+```java
+@RestControllerAdvice
+```
+
+Handled Exceptions:
+
+* UserNotFound
+* TaskNotFound
+* ApiException
+* Validation Exceptions
+
+Example Response:
+
+```json
+{
+  "message": "Task id 5 not found"
+}
+```
+
+---
+
+## Pagination
+
+Example:
+
+```http
+GET /api/1/tasks?pageNo=0&pageSize=5
+```
+
+Benefits:
+
+* Faster API responses
+* Better scalability
+* Reduced memory usage
+* Efficient database querying
+
+---
+
+## Swagger Documentation
+
+After running the application:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+Features:
+
+* Interactive API Testing
+* JWT Authorization Support
+* API Documentation
+* Request/Response Examples
+
+---
+
+## Screenshots
+
+Create a folder:
+
+```text
+screenshots/
+```
+
+Add:
+
+```text
+swagger-ui.png
+login-api.png
+refresh-token-api.png
+pagination-api.png
+admin-api.png
+```
+
+README Example:
+
+```md
+![Swagger UI](screenshots/swagger-ui.png)
+```
+
+---
+
+## Running the Application
+
+### Clone Repository
+
+```bash
+git clone https://github.com/yourusername/task-management-system.git
+```
+
+### Navigate to Project
+
+```bash
+cd task-management-system
+```
+
+### Configure Database
+
+Update:
+
+```properties
+application.properties
+```
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/taskdb
+spring.datasource.username=root
+spring.datasource.password=yourpassword
+```
+
+### Run Application
+
+```bash
 mvn spring-boot:run
+```
 
-4. Access APIs using Postman
+---
 
-## Learning Outcomes
-
-Through this project, I gained practical experience in:
-
-* Spring Boot Development
-* REST API Design
-* DTO Pattern
-* Exception Handling
-* Spring Security
-* JWT Authentication
-* Database Integration using JPA/Hibernate
-* Layered Architecture
-* Git and GitHub
 
 ## Author
 
-Kishore
+**Korada Kishore**
 
-Backend Developer | Java | Spring Boot
+Backend Java Developer
+
+GitHub: https://github.com/Kishorekorada78
